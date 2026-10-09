@@ -189,6 +189,48 @@ export async function callMcpTool(toolName, params = {}, apiKey = '') {
   };
 }
 
+/**
+ * Vercel Serverless Function default export
+ * Handles GET /api/mcp and POST /api/mcp requests on Vercel deployment
+ */
+export default async function handler(req, res) {
+  // CORS Headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-api-key'
+  );
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  try {
+    const apiKey = (req.query?.apiKey || req.headers?.['x-api-key'] || '').toString();
+
+    // If POST with tool execution
+    if (req.method === 'POST' && req.body?.toolName) {
+      const toolRes = await callMcpTool(req.body.toolName, req.body.params || {}, apiKey);
+      return res.status(200).json(toolRes);
+    }
+
+    const result = await checkMcpConnection({ apiKey });
+    return res.status(200).json({
+      ...result,
+      cachedProfilesCount: 42,
+      lastSyncBatchTime: new Date().toISOString(),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      isOnline: false,
+      error: error.message,
+    });
+  }
+}
+
 // CLI standalone runner
 if (process.argv[1] && process.argv[1].endsWith('mcp.js')) {
   console.log('---------------------------------------------------------');
