@@ -16,6 +16,44 @@ let creators = JSON.parse(JSON.stringify(INITIAL_CREATORS));
 let lastSyncBatchTime = new Date().toISOString();
 
 /**
+ * Robust category matcher supporting compound names & subcategories
+ */
+function matchesCategory(creator, filterCat) {
+  if (!filterCat || filterCat === 'All') return true;
+  const f = filterCat.trim().toLowerCase();
+  const c = (creator.category || '').toLowerCase();
+  const subs = (creator.subCategories || []).map((s) => s.toLowerCase());
+
+  if (c.includes(f) || f.includes(c)) return true;
+  if (subs.some((s) => s.includes(f) || f.includes(s))) return true;
+
+  if (f.includes('dating') && (c.includes('dating') || c.includes('romance') || c.includes('relationship'))) return true;
+  if (f.includes('tech') && (c.includes('tech') || c.includes('gadget'))) return true;
+  if (f.includes('food') && (c.includes('food') || c.includes('dining') || c.includes('eats'))) return true;
+  if (f.includes('fashion') && (c.includes('fashion') || c.includes('luxury') || c.includes('style'))) return true;
+  if (f.includes('fitness') && (c.includes('fitness') || c.includes('wellness') || c.includes('run'))) return true;
+  if (f.includes('finance') && (c.includes('finance') || c.includes('wealth'))) return true;
+  if (f.includes('comedy') && (c.includes('comedy') || c.includes('entertainment'))) return true;
+  if (f.includes('travel') && (c.includes('travel') || c.includes('escape'))) return true;
+  if (f.includes('beauty') && (c.includes('beauty') || c.includes('skincare'))) return true;
+  if (f.includes('gaming') && (c.includes('gaming') || c.includes('esport'))) return true;
+
+  return false;
+}
+
+/**
+ * Robust country/cluster matcher
+ */
+function matchesCountry(creator, filterCountry) {
+  if (!filterCountry || filterCountry === 'All') return true;
+  const fc = filterCountry.trim().toLowerCase();
+  const loc = (creator.location || '').toLowerCase();
+  if (loc.includes(fc) || fc.includes(loc)) return true;
+  if (creator.demographics?.geography?.some((g) => g.country.toLowerCase().includes(fc) && g.pct >= 40)) return true;
+  return false;
+}
+
+/**
  * GET /api/health
  * System health monitor checking all API routes, database, and MCP connectivity
  */
@@ -101,9 +139,14 @@ router.post('/creators/ai-search', async (req, res) => {
 
     let list = [...geminiResult.creators];
 
+    // Country filter
+    if (country && country !== 'All') {
+      list = list.filter((c) => matchesCountry(c, country));
+    }
+
     // Category filter
     if (category && category !== 'All') {
-      list = list.filter((c) => c.category.toLowerCase().includes(category.toLowerCase()));
+      list = list.filter((c) => matchesCategory(c, category));
     }
 
     // Min Score
@@ -138,7 +181,7 @@ router.post('/creators/ai-search', async (req, res) => {
 
     const total = list.length;
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const pageSize = Math.max(1, parseInt(limit, 10) || 4);
+    const pageSize = Math.max(1, parseInt(limit, 10) || 8);
     const startIndex = (pageNum - 1) * pageSize;
     const paginated = list.slice(startIndex, startIndex + pageSize);
 
@@ -146,7 +189,7 @@ router.post('/creators/ai-search', async (req, res) => {
       data: paginated,
       meta: {
         total,
-        clusterTotal: 42,
+        clusterTotal: creators.length,
         page: pageNum,
         pageSize,
         totalPages: Math.ceil(total / pageSize) || 1,
@@ -217,9 +260,14 @@ router.get('/creators', async (req, res) => {
     }
   }
 
+  // Country filter
+  if (country && typeof country === 'string' && country !== 'All') {
+    list = list.filter((c) => matchesCountry(c, country));
+  }
+
   // Category filter
   if (category && typeof category === 'string' && category !== 'All') {
-    list = list.filter((c) => c.category.toLowerCase().includes(category.toLowerCase()));
+    list = list.filter((c) => matchesCategory(c, category));
   }
 
   // Min Score
@@ -256,7 +304,7 @@ router.get('/creators', async (req, res) => {
 
   const total = list.length;
   const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const pageSize = Math.max(1, parseInt(limit, 10) || 4);
+  const pageSize = Math.max(1, parseInt(limit, 10) || 8);
   const startIndex = (pageNum - 1) * pageSize;
   const paginated = list.slice(startIndex, startIndex + pageSize);
 
@@ -264,7 +312,7 @@ router.get('/creators', async (req, res) => {
     data: paginated,
     meta: {
       total,
-      clusterTotal: 42, // Display total SG Cluster count from UI specification
+      clusterTotal: creators.length,
       page: pageNum,
       pageSize,
       totalPages: Math.ceil(total / pageSize) || 1,

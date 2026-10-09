@@ -37,13 +37,19 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   const categories = [
     'All',
     'Dating & Relationships',
-    'Relationship Advice',
-    'Speed Dating & Nightlife',
-    'Dating Humor & Podcasts',
+    'Tech & Gadgets',
+    'Food & Dining',
+    'Fashion & Luxury',
+    'Fitness & Wellness',
+    'Finance & Wealth',
+    'Travel & Escapes',
+    'Comedy & Entertainment',
+    'Beauty & Skincare',
+    'Gaming & Esports',
     'Lifestyle SG',
   ];
 
-  const countries = ['Singapore', 'Malaysia', 'Regional SE Asia'];
+  const countries = ['All Countries', 'Singapore', 'Malaysia', 'Regional SE Asia'];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
@@ -72,20 +78,24 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               Target Country / Cluster
             </label>
             <div className="flex flex-wrap gap-2">
-              {countries.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => onSelectCountry(c === selectedCountry ? '' : c)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border ${
-                    selectedCountry === c
-                      ? 'bg-[#c9e6ff] text-[#001e2f] border-[#89ceff]'
-                      : 'bg-white text-[#464555] border-[#e2e8f0] hover:bg-[#eff4ff]'
-                  }`}
-                >
-                  {c === 'Singapore' ? '🇸🇬 ' : ''}
-                  {c}
-                </button>
-              ))}
+              {countries.map((c) => {
+                const isAll = c === 'All Countries';
+                const isSelected = isAll ? !selectedCountry : selectedCountry === c;
+                return (
+                  <button
+                    key={c}
+                    onClick={() => onSelectCountry(isAll ? '' : c === selectedCountry ? '' : c)}
+                    className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border ${
+                      isSelected
+                        ? 'bg-[#c9e6ff] text-[#001e2f] border-[#89ceff]'
+                        : 'bg-white text-[#464555] border-[#e2e8f0] hover:bg-[#eff4ff]'
+                    }`}
+                  >
+                    {c === 'Singapore' ? '🇸🇬 ' : c === 'Malaysia' ? '🇲🇾 ' : ''}
+                    {c}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -98,7 +108,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               {categories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => onSelectCategory(cat === 'All' ? '' : cat)}
+                  onClick={() => onSelectCategory(cat === 'All' ? '' : cat === selectedCategory ? '' : cat)}
                   className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors border ${
                     (cat === 'All' && !selectedCategory) || selectedCategory === cat
                       ? 'bg-[#3525cd] text-white border-[#3525cd]'

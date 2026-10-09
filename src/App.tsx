@@ -47,17 +47,17 @@ export default function App() {
   const [isAiSearching, setIsAiSearching] = useState(false);
   const [aiInsights, setAiInsights] = useState<AiInsights | null>(null);
 
-  // Filters initialized to match the user's reference design
-  const [searchQuery, setSearchQuery] = useState('Leading dating KOLs in Singapore');
-  const [selectedCategory, setSelectedCategory] = useState('Dating & Relationships');
-  const [selectedCountry, setSelectedCountry] = useState('Singapore');
+  // Default: NO default filters limiting the display of profiles in Influship
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [minScoreFilter, setMinScoreFilter] = useState<number | null>(null);
   const [minFollowersFilter, setMinFollowersFilter] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState('score');
   const [includeWithoutRecentPosts, setIncludeWithoutRecentPosts] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(3);
-  const [totalClusterCount, setTotalClusterCount] = useState(42);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalClusterCount, setTotalClusterCount] = useState(15);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -69,22 +69,22 @@ export default function App() {
     setLoading(true);
     try {
       const res = await fetchCreators({
-        q: searchQuery,
-        category: selectedCategory,
-        country: selectedCountry,
+        q: searchQuery || undefined,
+        category: selectedCategory || undefined,
+        country: selectedCountry || undefined,
         minScore: minScoreFilter || undefined,
         minFollowers: minFollowersFilter || undefined,
         sort: sortBy,
         page: currentPage,
-        limit: 4,
+        limit: 8,
         includeInactive: includeWithoutRecentPosts,
       });
       setCreators(res.data);
       if (res.aiInsights) {
         setAiInsights(res.aiInsights);
       }
-      setTotalPages(res.meta.totalPages || 3);
-      setTotalClusterCount(res.meta.clusterTotal || 42);
+      setTotalPages(res.meta.totalPages || 1);
+      setTotalClusterCount(res.meta.clusterTotal || res.data.length);
 
       // If a creator is selected, sync its state
       if (selectedCreator) {
@@ -237,8 +237,9 @@ export default function App() {
     setMinScoreFilter(null);
     setMinFollowersFilter(null);
     setCurrentPage(1);
+    setAiInsights(null);
     setIsFilterModalOpen(false);
-    showToast('Filters reset to default');
+    showToast('All filters cleared — displaying all profiles');
   };
 
   const appliedFilterCount =
@@ -246,7 +247,7 @@ export default function App() {
     (selectedCategory ? 1 : 0) +
     (minScoreFilter ? 1 : 0) +
     (minFollowersFilter ? 1 : 0) +
-    (searchQuery ? 1 : 0);
+    (searchQuery.trim() ? 1 : 0);
 
   const shortlistedCount = creators.filter((c) => c.shortlisted).length;
 
@@ -342,6 +343,7 @@ export default function App() {
                   setIncludeWithoutRecentPosts((prev) => !prev)
                 }
                 appliedFilterCount={appliedFilterCount}
+                onResetFilters={handleResetFilters}
               />
             )}
 

@@ -39,6 +39,7 @@ interface DiscoveryViewProps {
   includeWithoutRecentPosts: boolean;
   onToggleIncludeWithoutRecentPosts: () => void;
   appliedFilterCount: number;
+  onResetFilters?: () => void;
 }
 
 export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
@@ -73,6 +74,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
   includeWithoutRecentPosts,
   onToggleIncludeWithoutRecentPosts,
   appliedFilterCount,
+  onResetFilters,
 }) => {
   const [exportNotice, setExportNotice] = useState(false);
 
@@ -186,7 +188,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
           </span>
           <input
             className="w-full pl-11 pr-36 py-3 bg-transparent text-[14px] text-[#0b1c30] placeholder:text-[#777587] focus:outline-none font-['Inter']"
-            placeholder="Ask Gemini to query suitable KOLs via Influship (e.g. 'Nightlife speed dating hosts', 'Couple vlogs')..."
+            placeholder="Search or ask Gemini to discover KOLs across all niches (e.g. 'Tech reviewers', 'Foodies', 'Dating creators')..."
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -243,21 +245,23 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
             Try asking:
           </span>
           {[
-            'Leading dating KOLs in Singapore',
-            'Nightlife speed dating event hosts',
-            'Couple travel & lifestyle vlogs',
-            'High authenticity Gen Z comedy',
-          ].map((sampleQuery) => (
+            { label: 'All Top Creators', query: '' },
+            { label: '🇸🇬 Singapore KOLs', query: 'Verified creators in Singapore' },
+            { label: '❤️ Dating & Relationships', query: 'Dating and relationship podcast hosts' },
+            { label: '💻 Tech & AI Gadgets', query: 'Tech gadget reviewers and electronics' },
+            { label: '🍲 Food & Cafe Guides', query: 'Food lovers and cafe hunters' },
+            { label: '👗 Fashion & Luxury GRWM', query: 'Fashion styling and luxury' },
+          ].map((item) => (
             <button
-              key={sampleQuery}
+              key={item.label}
               type="button"
               onClick={() => {
-                onSearchChange(sampleQuery);
-                if (onTriggerAiSearch) onTriggerAiSearch(sampleQuery);
+                onSearchChange(item.query);
+                if (onTriggerAiSearch) onTriggerAiSearch(item.query);
               }}
               className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white hover:bg-[#eff4ff] text-[#464555] hover:text-[#3525cd] border border-[#e2e8f0] transition-colors shadow-2xs"
             >
-              {sampleQuery}
+              {item.label}
             </button>
           ))}
         </div>
@@ -340,31 +344,134 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
         </div>
       )}
 
-      {/* Dynamic Filter Pill Carousel */}
+      {/* Dynamic Filter Pill Carousel with Quick Toggles */}
       <div className="flex items-center gap-2 px-6 lg:px-8 overflow-x-auto no-scrollbar pb-1 mb-3 text-nowrap">
-        {/* Active Filter: Country */}
-        {selectedCountry && (
+        {/* Quick Toggle: Singapore */}
+        <button
+          type="button"
+          onClick={() => onCountryChange(selectedCountry === 'Singapore' ? '' : 'Singapore')}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold font-['Geist'] transition-all shadow-xs border ${
+            selectedCountry === 'Singapore'
+              ? 'bg-[#3525cd] text-white border-[#3525cd]'
+              : 'bg-white text-[#0b1c30] border-[#e2e8f0] hover:bg-[#eff4ff]'
+          }`}
+          title={selectedCountry === 'Singapore' ? 'Remove Singapore filter' : 'Filter by Singapore'}
+        >
+          <span>🇸🇬</span>
+          <span>Singapore</span>
+          {selectedCountry === 'Singapore' && (
+            <span className="material-symbols-outlined text-[14px]">check</span>
+          )}
+        </button>
+
+        {/* Quick Toggle: Dating & Relationships */}
+        <button
+          type="button"
+          onClick={() =>
+            onCategoryChange(selectedCategory === 'Dating & Relationships' ? '' : 'Dating & Relationships')
+          }
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold font-['Geist'] transition-all shadow-xs border ${
+            selectedCategory === 'Dating & Relationships'
+              ? 'bg-[#ba1a1a] text-white border-[#ba1a1a]'
+              : 'bg-white text-[#0b1c30] border-[#e2e8f0] hover:bg-[#eff4ff]'
+          }`}
+          title={
+            selectedCategory === 'Dating & Relationships'
+              ? 'Remove Dating & Relationships filter'
+              : 'Filter by Dating & Relationships'
+          }
+        >
+          <span
+            className={`material-symbols-outlined text-[15px] ${
+              selectedCategory === 'Dating & Relationships' ? 'text-white' : 'text-[#ba1a1a]'
+            }`}
+          >
+            favorite
+          </span>
+          <span>Dating &amp; Relationships</span>
+          {selectedCategory === 'Dating & Relationships' && (
+            <span className="material-symbols-outlined text-[14px]">check</span>
+          )}
+        </button>
+
+        {/* Quick Toggle: Tech & Gadgets */}
+        <button
+          type="button"
+          onClick={() => onCategoryChange(selectedCategory === 'Tech & Gadgets' ? '' : 'Tech & Gadgets')}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold font-['Geist'] transition-all shadow-xs border ${
+            selectedCategory === 'Tech & Gadgets'
+              ? 'bg-[#006591] text-white border-[#006591]'
+              : 'bg-white text-[#0b1c30] border-[#e2e8f0] hover:bg-[#eff4ff]'
+          }`}
+          title={
+            selectedCategory === 'Tech & Gadgets'
+              ? 'Remove Tech & Gadgets filter'
+              : 'Filter by Tech & Gadgets'
+          }
+        >
+          <span
+            className={`material-symbols-outlined text-[15px] ${
+              selectedCategory === 'Tech & Gadgets' ? 'text-white' : 'text-[#006591]'
+            }`}
+          >
+            devices
+          </span>
+          <span>Tech &amp; Gadgets</span>
+          {selectedCategory === 'Tech & Gadgets' && (
+            <span className="material-symbols-outlined text-[14px]">check</span>
+          )}
+        </button>
+
+        {/* Quick Toggle: Food & Dining */}
+        <button
+          type="button"
+          onClick={() => onCategoryChange(selectedCategory === 'Food & Dining' ? '' : 'Food & Dining')}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold font-['Geist'] transition-all shadow-xs border ${
+            selectedCategory === 'Food & Dining'
+              ? 'bg-[#b95000] text-white border-[#b95000]'
+              : 'bg-white text-[#0b1c30] border-[#e2e8f0] hover:bg-[#eff4ff]'
+          }`}
+          title={
+            selectedCategory === 'Food & Dining'
+              ? 'Remove Food & Dining filter'
+              : 'Filter by Food & Dining'
+          }
+        >
+          <span
+            className={`material-symbols-outlined text-[15px] ${
+              selectedCategory === 'Food & Dining' ? 'text-white' : 'text-[#b95000]'
+            }`}
+          >
+            restaurant
+          </span>
+          <span>Food &amp; Dining</span>
+          {selectedCategory === 'Food & Dining' && (
+            <span className="material-symbols-outlined text-[14px]">check</span>
+          )}
+        </button>
+
+        {/* Other Active Category (if selected from modal) */}
+        {selectedCategory &&
+          !['Dating & Relationships', 'Tech & Gadgets', 'Food & Dining'].includes(selectedCategory) && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#c9e6ff] text-[#001e2f] shadow-xs border border-[#89ceff]">
+              <span className="text-[12px] font-semibold font-['Geist']">{selectedCategory}</span>
+              <button
+                onClick={() => onCategoryChange('')}
+                aria-label="Remove category filter"
+                className="hover:opacity-75 flex items-center"
+              >
+                <span className="material-symbols-outlined text-[14px]">close</span>
+              </button>
+            </div>
+          )}
+
+        {/* Other Active Country (if selected from modal) */}
+        {selectedCountry && selectedCountry !== 'Singapore' && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#c9e6ff] text-[#001e2f] shadow-xs border border-[#89ceff]">
-            <span className="text-[13px]">🇸🇬</span>
             <span className="text-[12px] font-semibold font-['Geist']">{selectedCountry}</span>
             <button
               onClick={() => onCountryChange('')}
               aria-label="Remove country filter"
-              className="hover:opacity-75 flex items-center"
-            >
-              <span className="material-symbols-outlined text-[14px]">close</span>
-            </button>
-          </div>
-        )}
-
-        {/* Active Filter: Category */}
-        {selectedCategory && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#c9e6ff] text-[#001e2f] shadow-xs border border-[#89ceff]">
-            <span className="material-symbols-outlined text-[15px] text-[#ba1a1a]">favorite</span>
-            <span className="text-[12px] font-semibold font-['Geist']">{selectedCategory}</span>
-            <button
-              onClick={() => onCategoryChange('')}
-              aria-label="Remove category filter"
               className="hover:opacity-75 flex items-center"
             >
               <span className="material-symbols-outlined text-[14px]">close</span>
@@ -403,6 +510,19 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
           <span>Followers: 100k+</span>
         </button>
 
+        {/* Clear All Filters button (visible when any filter is active) */}
+        {appliedFilterCount > 0 && onResetFilters && (
+          <button
+            type="button"
+            onClick={onResetFilters}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-colors shadow-xs text-[12px] font-semibold font-['Geist']"
+            title="Clear all active filters"
+          >
+            <span className="material-symbols-outlined text-[15px]">filter_alt_off</span>
+            <span>Clear Filters ({appliedFilterCount})</span>
+          </button>
+        )}
+
         {/* More Filters with Count Badge */}
         <button
           onClick={onOpenFilterSheet}
@@ -422,7 +542,10 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
           <span className="text-[13px] text-[#0b1c30] font-bold font-['Geist']">
             {totalClusterCount} Matched Creators
           </span>
-          <span className="text-[13px] text-[#464555]">in Singapore Cluster</span>
+          <span className="text-[13px] text-[#464555]">
+            {selectedCountry ? `in ${selectedCountry}` : 'across all profiles'}
+            {selectedCategory ? ` • ${selectedCategory}` : ''}
+          </span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -473,13 +596,17 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
             </p>
             <button
               onClick={() => {
-                onSearchChange('');
-                onCategoryChange('Dating & Relationships');
-                onCountryChange('Singapore');
+                if (onResetFilters) {
+                  onResetFilters();
+                } else {
+                  onSearchChange('');
+                  onCategoryChange('');
+                  onCountryChange('');
+                }
               }}
-              className="px-4 py-2 rounded-xl bg-[#3525cd] text-white text-[13px] font-semibold"
+              className="px-4 py-2 rounded-xl bg-[#3525cd] text-white text-[13px] font-semibold hover:bg-[#4f46e5] transition-colors"
             >
-              Reset Filters
+              Clear All Filters
             </button>
           </div>
         ) : (
@@ -501,7 +628,8 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
       {/* Pagination & Navigation Controls */}
       <div className="px-6 lg:px-8 mt-6 flex items-center justify-between">
         <span className="text-[13px] text-[#464555] font-['Geist']">
-          Showing 1 to {Math.min(creators.length, 4)} of {totalClusterCount} KOLs in Singapore Cluster
+          Showing {creators.length > 0 ? 1 : 0} to {creators.length} of {totalClusterCount} KOLs
+          {selectedCountry ? ` in ${selectedCountry}` : ' in Directory'}
         </span>
 
         <div className="flex items-center gap-1.5">
@@ -517,7 +645,7 @@ export const DiscoveryView: React.FC<DiscoveryViewProps> = ({
             <span className="material-symbols-outlined text-[20px]">chevron_left</span>
           </button>
 
-          {[1, 2, 3].map((page) => (
+          {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => onPageChange(page)}

@@ -89,7 +89,7 @@ export async function queryKolsWithGeminiAndInfluship(query, candidateCreators =
     return {
       creators: candidateCreators,
       aiInsights: {
-        summary: 'Displaying verified Key Opinion Leaders in Singapore.',
+        summary: 'Displaying verified Key Opinion Leaders across all niches and categories.',
         query: trimmedQuery,
         matchedCount: candidateCreators.length,
         usedGemini: false,
