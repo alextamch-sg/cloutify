@@ -2,10 +2,6 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/mcp",
-      "destination": "/api/mcp.js"
-    },
-    {
       "source": "/api/health",
       "destination": "/api/health.js"
     },

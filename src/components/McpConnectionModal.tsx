@@ -123,20 +123,20 @@ export const McpConnectionModal: React.FC<McpConnectionModalProps> = ({
               <div className="bg-white p-2 rounded-lg border border-[#e2e8f0]">
                 <span className="text-[#464555] block text-[10px]">AUTH MODE</span>
                 <span className="font-bold text-[#3525cd]">
-                  {status?.isAuthenticated ? 'Authorized' : 'Smithery Gateway'}
+                  {status?.isAuthenticated ? 'Authorized' : 'Streamable HTTP'}
                 </span>
               </div>
               <div className="bg-white p-2 rounded-lg border border-[#e2e8f0]">
                 <span className="text-[#464555] block text-[10px]">TOOLS COUNT</span>
                 <span className="font-bold text-[#0b1c30]">
-                  {status?.availableTools?.length || 9} Tools
+                  {status?.availableTools?.length || 10} Tools
                 </span>
               </div>
             </div>
 
             <p className="text-[12px] text-[#464555] mt-2.5 font-['Inter']">
               {status?.message ||
-                'Influship MCP endpoint is reachable and responsive (checked via /api/mcp.js).'}
+                'Influship MCP endpoint is reachable via Streamable HTTP (https://mcp.influship.com/mcp).'}
             </p>
           </div>
 

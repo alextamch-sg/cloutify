@@ -5,7 +5,6 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
-import { callMcpTool } from './mcp.js';
 
 // Server-side Google GenAI initialization
 const ai = new GoogleGenAI({
@@ -68,21 +67,6 @@ async function generateWithGeminiFallback(prompt, systemInstruction) {
  */
 export async function queryKolsWithGeminiAndInfluship(query, candidateCreators = [], filterOptions = {}) {
   const trimmedQuery = (query || '').trim();
-
-  // Fast non-blocking handshake with Influship MCP semantic search tool
-  try {
-    const mcpPromise = callMcpTool('semantic_search_creators', {
-      query: trimmedQuery,
-      limit: 10,
-    });
-    // Give MCP call a tight 1200ms window so it never holds up Gemini response
-    await Promise.race([
-      mcpPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('MCP timeout')), 1200)),
-    ]);
-  } catch {
-    // Non-blocking fallback to local cache
-  }
 
   // If query is empty, return default listing
   if (!trimmedQuery) {

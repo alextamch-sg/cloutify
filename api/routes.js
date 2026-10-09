@@ -4,7 +4,6 @@
  */
 
 import { Router } from 'express';
-import { checkMcpConnection, callMcpTool, INFLUSHIP_MCP_URL, KNOWN_TOOLS } from './mcp.js';
 import { INITIAL_CREATORS } from './creators-data.js';
 import { getHealthStatus } from './health.js';
 import { queryKolsWithGeminiAndInfluship } from './gemini.js';
@@ -67,48 +66,6 @@ router.get('/health', async (_req, res) => {
       error: error.message,
       timestamp: new Date().toISOString(),
     });
-  }
-});
-
-/**
- * GET /api/mcp
- * Check connection to Influship MCP server on Smithery
- */
-router.get('/mcp', async (req, res) => {
-  try {
-    const apiKey = (req.query.apiKey || req.headers['x-api-key'] || '').toString();
-    const result = await checkMcpConnection({ apiKey });
-    res.json({
-      ...result,
-      cachedProfilesCount: creators.length,
-      lastSyncBatchTime,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      isOnline: false,
-      error: error.message,
-    });
-  }
-});
-
-/**
- * POST /api/mcp/tool
- * Execute an MCP tool or run a simulation via Influship
- */
-router.post('/mcp/tool', async (req, res) => {
-  try {
-    const { toolName, params } = req.body;
-    const apiKey = (req.headers['x-api-key'] || '').toString();
-
-    if (!toolName) {
-      return res.status(400).json({ error: 'toolName is required' });
-    }
-
-    const liveResult = await callMcpTool(toolName, params, apiKey);
-    res.json(liveResult);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 });
 

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "influship": {
+      "url": "https://mcp.influship.com/mcp",
+      "headers": {
+        "X-API-Key": "${INFLUSHIP_API_KEY}"
+      }
+    }
+  }
+}
