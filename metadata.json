@@ -1,0 +1,6 @@
+{
+  "name": "KOL Radar - Creator Intelligence & Discovery",
+  "description": "Real-time Key Opinion Leader discovery, audience reach audit, and creator profile deep dives powered by Influship MCP intelligence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
